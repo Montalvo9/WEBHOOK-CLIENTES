@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", //Le dice a TypeScript que convierta tu código a JS compatible con ECMAScript 2020, que Node soporta bien.
+    "module": "commonjs", // Indica que los módulos se manejarán como en Node clásico:Aunque también funciona con imports gracias a esModuleInterop.
+    "outDir": "./dist", //Carpeta donde TypeScript dejara el JS compilado 
+    "rootDir": "./src", // Le indica a TypeScript que todo el codigo fuente esta dentro del src
+    "strict": true,  //Activa el modo estrico, obliga a escribir TypeScript limpio y seguro (Ejemplp: detecta variables sin definirm tipos incorrectos etc.)
+    "esModuleInterop": true, //Permite mezclar módulos CommonJS y ES6 sin problemas.
+    "skipLibCheck": true, //Hace la compilación más rápida al no revisar tipos dentro de librerías externas.
+    "forceConsistentCasingInFileNames": true, //Evita errores por diferencias de mayúsculas/minúsculas en rutas de archivos. 
+    "resolveJsonModule": true //Permite importar JSON directamente (import data from "./data.json")
+  },
+  "include": ["src/**/*", "src/types/index.ts"], //indica que archivos debe tomar en cuenta TypeScript
+  "exclude": ["node_modules", "dist"]
+}
