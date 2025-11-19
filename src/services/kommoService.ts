@@ -4,6 +4,7 @@ import { clearScreenDown } from "readline";
 import { promises } from "dns";
 import { debugLog } from "../utils/helpers";
 import { execSync } from "child_process";
+import colors from 'colors';
 
 export class KommoService {
     private accessToken: string;
@@ -55,8 +56,19 @@ export class KommoService {
         const leadData = await this.obtenerLeadConContactos(leadId, subdomain);
 
         if (leadData) {
+            //Buscar campo personalizado 
+             const campoNombreId = parseInt(process.env.CAMPO_NOMBRE_USER || "1493362");
+             const campos = leadData.custom_fields_values || [];
+             const campoNombre = campos.find(c => c.field_id === campoNombreId);
 
-            // 1) Obtener nombre del lead si no es "Lead #"
+             if(campoNombre && campoNombre.values?.length > 0){
+                datos.nombre = campoNombre.values[0].value; 
+                debugLog(colors.bgMagenta("Nombre extraido del campo personalizado"), datos);
+                return datos;  //Usamos el nombre ingresado y dejamos de buscar
+             }
+             
+             //Si no existe el campo personalizado usar el nombre del lead
+             // 1) Obtener nombre del lead si no es "Lead #"
             if (leadData.name && !leadData.name.includes('Lead #')) {
                 datos.nombre = leadData.name;
             }

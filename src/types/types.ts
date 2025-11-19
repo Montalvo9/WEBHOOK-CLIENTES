@@ -1,11 +1,11 @@
 //La busqueda  de los leads en la base sera por por nombre 
 export interface ContactData {
-    nombre: string
+  nombre: string
 }
 
 
 //Datos del lead que se ve en kommo 
-export interface LeadData{
+/*export interface LeadData{
     id: number,
     name? : string;
     _embedded?: {
@@ -13,7 +13,21 @@ export interface LeadData{
             id: number; 
         }>;
     };
+}*/
+export interface LeadData {
+  id: number;
+  name?: string;
+
+  custom_fields_values?: {
+    field_id: number;
+    values: { value: string }[];
+  }[];
+
+  _embedded?: {
+    contacts: { id: number }[];
+  };
 }
+
 
 //Datos del contacto completo 
 export interface ContactFullData {
@@ -29,8 +43,8 @@ export interface ContactFullData {
   }>;
 }
 
-export interface AccountData{
-    subdomain?: string;
+export interface AccountData {
+  subdomain?: string;
 }
 
 export interface WebhookPayload {
