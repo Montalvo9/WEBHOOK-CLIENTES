@@ -1,4 +1,6 @@
+import stringSimilarity from "string-similarity";
 import { timeStamp } from 'console';
+
 /*La funcion normalizar texto: 
 -Convierte el nombre a minisculas (lo que le mandan)
 -Quita acentos 
@@ -13,6 +15,19 @@ export function normalizarTexto(texto: string): string {
     return textoLower.replace(/[áéíóúñüàèò]/g, letra => acentos[letra] || letra);
 }
 
+/*Función son similares */
+export function sonSimilares(a: string, b:string): boolean{
+    if(!a || !b) return false; 
+    const na = normalizarTexto(a); 
+    const nb = normalizarTexto(b);
+
+    const similitud = stringSimilarity.compareTwoStrings(na, nb);
+
+    return similitud >= 0.72;
+}
+
+
+
 export function extraerDatosContacto(mensaje: string) {
     const datos = {
         nombre: ''
@@ -23,6 +38,8 @@ export function extraerDatosContacto(mensaje: string) {
     
     return datos;
 }
+
+
 
 
 

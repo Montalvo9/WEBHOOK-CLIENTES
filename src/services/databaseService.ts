@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise';
 import { ContactData } from '../types/types';
-import { normalizarTexto, debugLog } from '../utils/helpers';
+import { normalizarTexto, debugLog, sonSimilares } from '../utils/helpers';
 import colors from 'colors';
 
 
@@ -16,6 +16,9 @@ export class DatabaseService {
       charset: 'utf8mb4'
     })
   }
+  /* Funcion que verifica en la base de manera estricta, si el usuario escribe mal su nombre le 
+  el sistema le dira que no fue encontrado (No es cliente)
+  */
   /*async verificarEnBaseDatos(datos: ContactData): Promise<boolean> {
     debugLog('--- BÚSQUEDA EN BD ---');
 
@@ -58,13 +61,69 @@ export class DatabaseService {
     }
   }*/
 
- async verificarEnBaseDatos(datos: ContactData): Promise<boolean> {
+  /* async verificarEnBaseDatos(datos: ContactData): Promise<boolean> {
+      // debugLog('--- BÚSQUEDA EN BD ---');
+      debugLog(colors.bgYellow('BÚSQUEDA EB LA BASE DE DATOS'));
+  
+      if (!datos.nombre || datos.nombre.includes("Lead #")) {
+          debugLog("Sin datos válidos para buscar");
+          return false;
+      }
+  
+      // Normalizar texto en JS (sin función SQL)
+      const nombreCompleto = normalizarTexto(datos.nombre); // “luis alberto lezama”
+      const partes = nombreCompleto.split(" ").filter(p => p.length > 0);  //Separamos por palabras
+  
+      if (partes.length === 0) return false;
+  
+      const primerNombre = partes[0];                         // “luis”
+      const primerApellido = partes[partes.length - 1];       // “lezama”
+  
+      debugLog(`→ Nombre procesado: ${primerNombre} ${primerApellido}`);
+  
+      const query = `
+          SELECT *
+          FROM clientes
+          WHERE
+              LOWER(REPLACE(nombre, 'á', 'a')) LIKE CONCAT('%', ?, '%')
+          AND LOWER(REPLACE(apellido, 'á', 'a')) LIKE CONCAT('%', ?, '%')
+      `;
+  
+      try {
+          const [rows] = await this.pool.query<any[]>(query, [
+              primerNombre,
+              primerApellido
+          ]);
+  
+          const existe = Array.isArray(rows) && rows.length > 0;
+  
+          if (existe) {
+              debugLog("CLIENTE ENCONTRADO", rows[0]);
+          } else {
+              debugLog("CLIENTE NO ENCONTRADO");
+          }
+  
+          return existe;
+  
+      } catch (error) {
+          debugLog("Error en consulta BD:", error);
+          return false;
+      }
+  }*/
+
+
+  /*        Funcion verificarEnBaseDatos mejorada. Se agrego la parte de busqueda por similtud
+            Ejemplo: Mitzi Ortiz Flores
+                     Mitzy Ortiz Flores
+  */
+
+  async verificarEnBaseDatos(datos: ContactData): Promise<boolean> {
     // debugLog('--- BÚSQUEDA EN BD ---');
     debugLog(colors.bgYellow('BÚSQUEDA EB LA BASE DE DATOS'));
 
     if (!datos.nombre || datos.nombre.includes("Lead #")) {
-        debugLog("Sin datos válidos para buscar");
-        return false;
+      debugLog("Sin datos válidos para buscar");
+      return false;
     }
 
     // Normalizar texto en JS (sin función SQL)
@@ -82,31 +141,43 @@ export class DatabaseService {
         SELECT *
         FROM clientes
         WHERE
-            LOWER(REPLACE(nombre, 'á', 'a')) LIKE CONCAT('%', ?, '%')
-        AND LOWER(REPLACE(apellido, 'á', 'a')) LIKE CONCAT('%', ?, '%')
+            LOWER(nombre) LIKE CONCAT('%', ?, '%')
+        OR LOWER(apellido) LIKE CONCAT('%', ?, '%')
     `;
 
     try {
-        const [rows] = await this.pool.query<any[]>(query, [
-            primerNombre,
-            primerApellido
-        ]);
+      const [rows] = await this.pool.query<any[]>(query, [
+        primerNombre,
+        primerApellido
+      ]);
 
-        const existe = Array.isArray(rows) && rows.length > 0;
+      if (!Array.isArray(rows) || rows.length === 0) {
+        debugLog(colors.bgRed("CLIENTE NO ENCONTRADO"));
+        return false;
+      }
 
-        if (existe) {
-            debugLog("CLIENTE ENCONTRADO", rows[0]);
-        } else {
-            debugLog("CLIENTE NO ENCONTRADO");
+      // Aplicamos similiutid 
+      for (const row of rows) {
+        const nombreBD = `${row.nombre} ${row.apellido}`;
+        if (sonSimilares(nombreCompleto, nombreBD)) {
+          debugLog(colors.bgGreen("CLIENTE ENCONTRADO (por similitud)"), row);
+          return true;
         }
+      }
 
-        return existe;
+      debugLog(colors.red("CLIENTE NO ENCONTRADO,(similitud insuficiente)"));
+      return false; 
+
+
 
     } catch (error) {
-        debugLog("Error en consulta BD:", error);
-        return false;
+      debugLog("Error en consulta BD:", error);
+      return false;
     }
-}
+  }
+
+
+
 
   /*private async crearFuncionNormalizacion(): Promise<void> {
     const createFunctionSQL = `
