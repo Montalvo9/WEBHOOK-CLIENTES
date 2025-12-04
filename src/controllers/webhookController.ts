@@ -42,7 +42,7 @@ export class WebhookController {
                 return;
             }
 
-            //Si recibe Json proncesa conm la funcion handleJsonRequest
+            //Si recibe Json procesa con la funcion handleJsonRequest
             if (req.is('application/json')) {
                 await this.handleJsonRequest(req, res);
                 return;

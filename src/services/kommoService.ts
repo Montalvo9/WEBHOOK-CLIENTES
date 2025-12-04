@@ -1,9 +1,6 @@
 import axios from "axios";
 import { LeadData, ContactData, AccountData, ContactFullData } from '../types/types';
-import { clearScreenDown } from "readline";
-import { promises } from "dns";
 import { debugLog } from "../utils/helpers";
-import { execSync } from "child_process";
 import colors from 'colors';
 
 export class KommoService {
