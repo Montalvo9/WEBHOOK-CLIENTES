@@ -30,7 +30,7 @@ export interface LeadData {
 
 
 //Datos del contacto completo 
-export interface ContactFullData {
+/*export interface ContactFullData {
   id?: number;
   name?: string;
   custom_fields_values?: Array<{
@@ -41,7 +41,24 @@ export interface ContactFullData {
       value: any; // puede ser string, boolean, number, etc
     }>;
   }>;
+}*/
+export interface ContactFullData {
+  id?: number;
+  name?: string;
+
+  custom_fields_values?: Array<{
+    field_id?: number;
+    field_code?: string;
+    field_name?: string;
+    values: Array<{
+      value: any;
+    }>;
+  }>;
+
+  _embedded?: any; //  Kommo SIEMPRE lo manda
+  _links?: any;    //  Y esto también
 }
+
 
 export interface AccountData {
   subdomain?: string;
